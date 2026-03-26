@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Core brand colors */
+  --color-bg-mint: #BAF2D8; /* Mint background */
+  --color-bg-dark: #1E1E1E; /* Dark mode background */
+  
+  --color-card-dark: #2A2A2A;
+  --color-card-light: #FFFFFF;
+  
+  /* Accents */
+  --color-accent-orange: #FF9B42;
+  --color-accent-purple: #8367C7;
+  --color-accent-yellow: #F9DC5C;
+  --color-accent-green: #2EC4B6;
+  --color-accent-blue: #90d8e8;
+
+  /* Text colors */
+  --color-text-primary: #121212;
+  --color-text-secondary: #5A5A5A;
+  --color-text-light: #F9F9F9;
+
+  /* Form Elements */
+  --color-input-bg: rgba(255, 255, 255, 0.4);
+
+  /* App Dimensions */
+  --border-radius-lg: 24px;
+  --border-radius-md: 16px;
+  --border-radius-sm: 8px;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  background-color: var(--color-bg-dark); /* Surrounding frame for desktop */
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Base App Container - simulate mobile view on desktop */
+#root {
+  width: 100%;
+  max-width: 480px; /* Constrain to mobile width on larger screens */
+  min-height: 100vh;
+  background-color: var(--color-bg-mint);
+  position: relative;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Reset basic elements */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  transition: transform var(--transition-fast);
+}
+
+button:active {
+  transform: scale(0.96);
+}
+
+.pill-button:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+@keyframes slideDown {
+  from { transform: translate(-50%, -150%); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+input {
+  font-family: inherit;
+  border: none;
+  outline: none;
+}
+
+/* Global utility classes inspired by the UI mockups */
+.card-glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
+.pill-button {
+  background-color: var(--color-text-primary);
+  color: var(--color-text-light);
+  border-radius: 9999px;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
