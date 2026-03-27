@@ -33,13 +33,16 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      // 1. Fetch recent activity
-      const { data: expensesData } = await supabase
-        .from('expenses')
-        .select('*')
-        .eq('creator_id', user.id)
-        .order('created_at', { ascending: false });
-      if (expensesData) setExpenses(expensesData);
+      // 1. Fetch recent activity mathematically correctly globally
+      const { data: myCreated } = await supabase.from('expenses').select('*').eq('creator_id', user.id);
+      const { data: myInvolved } = await supabase.from('expenses').select('*, expense_splits!inner(user_id)').eq('expense_splits.user_id', user.id);
+      
+      const allExp = [...(myCreated || []), ...(myInvolved || [])];
+      const uniqueExpMap = new Map();
+      allExp.forEach(e => uniqueExpMap.set(e.id, { id: e.id, description: e.description, total_amount: e.total_amount, created_at: e.created_at, creator_id: e.creator_id }));
+      const sortedExp = Array.from(uniqueExpMap.values()).sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+      
+      setExpenses(sortedExp);
 
       // 2. Fetch Balance (What others owe you)
       const { data: othersOweMe } = await supabase
@@ -96,13 +99,12 @@ const Dashboard = () => {
     const { error } = await supabase
       .from('expenses')
       .delete()
-      .eq('id', expenseId)
-      .eq('creator_id', user.id); 
+      .eq('id', expenseId);
 
     if (!error) {
        setRefreshTrigger(prev => prev + 1); // Auto-refreshes the dashboard mathematically
     } else {
-       alert("Failed to delete expense. You may not have permission.");
+       alert("Failed to delete expense.");
     }
   };
 
@@ -142,7 +144,7 @@ const Dashboard = () => {
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 500, margin: '0 0 0.2rem 0' }}>Hi there,</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <h1 style={{ fontSize: '1.8rem', fontWeight: 700, margin: 0, lineHeight: 1 }}>{user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Friend'}</h1>
-              <span style={{ background: 'var(--color-card-dark)', color: 'var(--color-text-secondary)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '10px', fontWeight: 700 }}>v2.1</span>
+              <span style={{ background: 'var(--color-card-dark)', color: 'var(--color-text-secondary)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '10px', fontWeight: 700 }}>v2.2</span>
             </div>
          </div>
          <div style={{ display: 'flex', gap: '1rem' }}>

@@ -61,7 +61,7 @@ const GroupDetails = () => {
        }]);
     }
 
-    await supabase.from('expenses').delete().eq('id', expenseId).eq('creator_id', user.id); 
+    await supabase.from('expenses').delete().eq('id', expenseId); 
     fetchGroupData();
   };
 
@@ -109,16 +109,14 @@ const GroupDetails = () => {
                   <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
                     ₹{exp.total_amount}
                   </div>
-                  {exp.creator_id === user.id && (
-                     <>
-                      <button onClick={() => navigate('/add-expense', { state: { editExpense: exp, presetGroupId: id } })} style={{ background: 'transparent', padding: '0.4rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Edit2 size={20} />
-                      </button>
-                      <button onClick={() => handleDelete(exp.id)} style={{ background: 'transparent', padding: '0.4rem', color: 'var(--color-accent-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Trash2 size={20} />
-                      </button>
-                     </>
-                  )}
+                  <>
+                    <button onClick={() => navigate('/add-expense', { state: { editExpense: exp, presetGroupId: id } })} style={{ background: 'transparent', padding: '0.4rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Edit2 size={20} />
+                    </button>
+                    <button onClick={() => handleDelete(exp.id)} style={{ background: 'transparent', padding: '0.4rem', color: 'var(--color-accent-orange)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Trash2 size={20} />
+                    </button>
+                  </>
                 </div>
               </div>
             ))
