@@ -40,4 +40,10 @@ Here is the finalized live status of all implemented application logic layers we
 ### ✅ Real-Time Ecosystem Operations
 - [x] Instant Live PostgreSQL Event Socket listeners.
 - [x] Screens repaint and shift numbers seamlessly synchronous without any necessity for browser reloads if another user triggers a change anywhere globally!
-- [x] **In-App Toast Notifications:** Beautiful slide-down alerts natively trigger if another user adds an expense explicitly involving you or settles a tracked debt globally!
+- [x] **In-App Toast Notifications:** Beautiful slide-down alerts natively trigger globally via a root-mounted Interceptor mapped flawlessly over your entire DOM structure.
+
+### ✅ Version 2.2+ Architecture Enhancements
+- [x] **Global Activity Ledger:** A structurally permanent chronologically mapped `/activity` log tracking table actively utilizing array-containment functions (`involved_users`) mathematically enforcing immutable auditing of every Added, Updated, Deleted, or Settled interaction instantly!
+- [x] **Collaborative Editor Overrides:** Fundamentally decoupled `creator_id` rigid constraint scopes, thereby securely permitting *any mathematically involved user* full explicit localized collaborative rights to instantly physically modify or intelligently cascade-delete associated datasets natively!
+- [x] **Group Administration Workflow:** Re-engineered dynamic `GroupDetails` interfaces natively mapping isolated multi-tenant expenditures globally, successfully unlocking capabilities for systematically pulling and safely evicting profiles out of internal `group_members` tables intelligently.
+- [x] **Financial Isolation Debt Barriers:** Extremely complex algorithmic validation constraints successfully deployed actively blocking any local peer from successfully deliberately defecting or being abruptly forcefully kicked from a unified layout if they harbor underlying unsettled financial calculations intrinsically bridged within that precise group context natively!
