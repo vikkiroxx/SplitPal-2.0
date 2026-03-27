@@ -144,7 +144,7 @@ const Dashboard = () => {
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 500, margin: '0 0 0.2rem 0' }}>Hi there,</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <h1 style={{ fontSize: '1.8rem', fontWeight: 700, margin: 0, lineHeight: 1 }}>{user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Friend'}</h1>
-              <span style={{ background: 'var(--color-card-dark)', color: 'var(--color-text-secondary)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '10px', fontWeight: 700 }}>v2.2</span>
+              <span style={{ background: 'var(--color-card-dark)', color: 'var(--color-text-secondary)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '10px', fontWeight: 700 }}>v2.3</span>
             </div>
          </div>
          <div style={{ display: 'flex', gap: '1rem' }}>
