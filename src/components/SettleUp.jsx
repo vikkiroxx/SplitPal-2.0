@@ -101,17 +101,38 @@ const SettleUp = () => {
     setIsSettling(true);
     
     const splitIdsToUpdate = [];
+    const involvedFriendIds = new Set();
+    let totalSettledAmount = 0;
+
     balances.forEach(b => {
       if (selectedFriends[b.id]) {
         splitIdsToUpdate.push(...b.splitIds);
+        involvedFriendIds.add(b.id);
+        totalSettledAmount += b.netBalance; // This is the net amount for this friend
       }
     });
 
     if (splitIdsToUpdate.length > 0) {
-      await supabase
+      const { error } = await supabase
         .from('expense_splits')
         .update({ has_paid: true })
         .in('id', splitIdsToUpdate);
+
+      if (error) {
+         alert("Error settling up!");
+         setIsSettling(false);
+         return;
+      }
+
+      const uniquelyInvolved = Array.from(involvedFriendIds);
+      if (!uniquelyInvolved.includes(user.id)) uniquelyInvolved.push(user.id);
+
+      await supabase.from('activity_logs').insert([{
+           user_id: user.id,
+           involved_users: uniquelyInvolved,
+           action_type: 'SETTLED',
+           description: `${user?.user_metadata?.full_name || 'Someone'} settled ₹${Math.abs(totalSettledAmount).toFixed(2)} mathematically.`
+      }]);
     }
     
     navigate('/');

@@ -50,6 +50,17 @@ const GroupDetails = () => {
     const confirmDelete = window.confirm("Delete this group expense?");
     if (!confirmDelete) return;
 
+    const { data: exp } = await supabase.from('expenses').select('*, expense_splits(user_id)').eq('id', expenseId).single();
+    if (exp) {
+       const inv = exp.expense_splits.map(s => s.user_id);
+       await supabase.from('activity_logs').insert([{
+         user_id: user.id,
+         involved_users: inv,
+         action_type: 'DELETED',
+         description: `${user?.user_metadata?.full_name || 'Someone'} deleted "${exp.description}"`
+       }]);
+    }
+
     await supabase.from('expenses').delete().eq('id', expenseId).eq('creator_id', user.id); 
     fetchGroupData();
   };

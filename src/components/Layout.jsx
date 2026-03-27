@@ -1,4 +1,4 @@
-import { Home, Users as UsersIcon, UsersRound, Settings } from 'lucide-react';
+import { Home, User, Users, Settings } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 
 const Layout = ({ children }) => {
@@ -6,8 +6,8 @@ const Layout = ({ children }) => {
 
   const navItems = [
     { icon: Home, path: '/', label: 'Home' },
-    { icon: UsersIcon, path: '/friends', label: 'Friends' },
-    { icon: UsersRound, path: '/groups', label: 'Groups' },
+    { icon: User, path: '/friends', label: 'Friends' },
+    { icon: Users, path: '/groups', label: 'Groups' },
     { icon: Settings, path: '/settings', label: 'Settings' }
   ];
 

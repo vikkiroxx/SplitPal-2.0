@@ -132,6 +132,17 @@ const SplitMath = () => {
     if (splitInserts.length > 0) {
       await supabase.from('expense_splits').insert(splitInserts);
     }
+    
+    // Mathematically Push Permanent Global Activity Log natively
+    const involved = splitInserts.map(s => s.user_id);
+    if (!involved.includes(user.id)) involved.push(user.id);
+    
+    await supabase.from('activity_logs').insert([{
+       user_id: user.id,
+       involved_users: involved,
+       action_type: editExpenseId ? 'UPDATED' : 'ADDED',
+       description: `${user?.user_metadata?.full_name || 'Someone'} ${editExpenseId ? 'updated' : 'added'} "${description || 'Split Expense'}" for ₹${totalAmount}`
+    }]);
 
     console.log("Expense saved successfully!");
     // Navigate back to Dashboard upon success

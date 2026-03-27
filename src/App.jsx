@@ -25,22 +25,26 @@ import SettleUp from './components/SettleUp';
 import GroupsList from './components/GroupsList';
 import GroupDetails from './components/GroupDetails';
 import Settings from './components/Settings';
+import GlobalLiveSync from './components/GlobalLiveSync';
+import ActivityLog from './components/ActivityLog';
 
 const AppRoutes = () => {
   const { session } = useAuth();
   return (
     <Routes>
+      <Route path="/" element={<ProtectedRoute><Layout><GlobalLiveSync /><Dashboard /></Layout></ProtectedRoute>} />
       <Route path="/login" element={session ? <Navigate to="/" replace /> : <Login />} />
-      <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
-      <Route path="/add-expense" element={<ProtectedRoute><AddExpense /></ProtectedRoute>} />
-      <Route path="/split" element={<ProtectedRoute><SplitMath /></ProtectedRoute>} />
-      <Route path="/settle" element={<ProtectedRoute><SettleUp /></ProtectedRoute>} />
+      {/* Settle doesn't have Layout, so we drop the global sync explicitly inside its ProtectedRoute! */}
+      <Route path="/add-expense" element={<ProtectedRoute><GlobalLiveSync /><AddExpense /></ProtectedRoute>} />
+      <Route path="/split" element={<ProtectedRoute><GlobalLiveSync /><SplitMath /></ProtectedRoute>} />
+      <Route path="/settle" element={<ProtectedRoute><GlobalLiveSync /><SettleUp /></ProtectedRoute>} />
       {/* Navigation routes */}
-      <Route path="/friends" element={<ProtectedRoute><Layout><FriendsList /></Layout></ProtectedRoute>} />
-      <Route path="/friend/:id" element={<ProtectedRoute><FriendDetails /></ProtectedRoute>} />
-      <Route path="/groups" element={<ProtectedRoute><Layout><GroupsList /></Layout></ProtectedRoute>} />
-      <Route path="/group/:id" element={<ProtectedRoute><GroupDetails /></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><Layout><Settings /></Layout></ProtectedRoute>} />
+      <Route path="/friends" element={<ProtectedRoute><Layout><GlobalLiveSync /><FriendsList /></Layout></ProtectedRoute>} />
+      <Route path="/friend/:id" element={<ProtectedRoute><GlobalLiveSync /><FriendDetails /></ProtectedRoute>} />
+      <Route path="/groups" element={<ProtectedRoute><Layout><GlobalLiveSync /><GroupsList /></Layout></ProtectedRoute>} />
+      <Route path="/group/:id" element={<ProtectedRoute><GlobalLiveSync /><GroupDetails /></ProtectedRoute>} />
+      <Route path="/activity" element={<ProtectedRoute><GlobalLiveSync /><ActivityLog /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><Layout><GlobalLiveSync /><Settings /></Layout></ProtectedRoute>} />
     </Routes>
   );
 };

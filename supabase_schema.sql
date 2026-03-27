@@ -71,3 +71,19 @@ CREATE TABLE IF NOT EXISTS public.group_members (
 
 -- Add group parameter to expenses
 ALTER TABLE public.expenses ADD COLUMN IF NOT EXISTS group_id UUID REFERENCES public.groups(id) ON DELETE CASCADE;
+
+-- ENABLE REALTIME SYNC --
+ALTER PUBLICATION supabase_realtime ADD TABLE public.expenses;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.expense_splits;
+
+-- Activity Logs
+CREATE TABLE IF NOT EXISTS public.activity_logs (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES public.profiles(id),
+  involved_users UUID[] NOT NULL,
+  action_type TEXT NOT NULL, 
+  description TEXT NOT NULL, 
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
+);
+
+ALTER PUBLICATION supabase_realtime ADD TABLE public.activity_logs;

@@ -1,5 +1,5 @@
 import { useAuth } from './AuthProvider';
-import { LogOut, Trash2, Edit2, Bell } from 'lucide-react';
+import { LogOut, Trash2, Edit2, Activity } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
@@ -10,7 +10,6 @@ const Dashboard = () => {
   const [expenses, setExpenses] = useState([]);
   const [balance, setBalance] = useState(0);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [notification, setNotification] = useState(null);
 
   const [showNotifModal, setShowNotifModal] = useState(false);
   const [notifHistory, setNotifHistory] = useState(() => {
@@ -20,14 +19,16 @@ const Dashboard = () => {
     } catch { return []; }
   });
 
-  const addNotif = (msg) => {
-     setNotification({ message: msg });
-     setTimeout(() => setNotification(null), 4500);
-     
-     const newHistory = [{ id: Date.now(), msg, time: new Date() }, ...notifHistory].slice(0, 20);
-     setNotifHistory(newHistory);
-     localStorage.setItem('splitpal_notifs', JSON.stringify(newHistory));
-  };
+  useEffect(() => {
+    const handleNotifSync = () => {
+      try {
+        const saved = localStorage.getItem('splitpal_notifs');
+        if (saved) setNotifHistory(JSON.parse(saved));
+      } catch(e) {}
+    };
+    window.addEventListener('splitpal_notif_sync', handleNotifSync);
+    return () => window.removeEventListener('splitpal_notif_sync', handleNotifSync);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -67,28 +68,30 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
     
-    // Establish Live Notifications & Database Socket Synchronization
-    const channel = supabase.channel('splitpal_live_sync')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'expenses' }, (payload) => {
-         if (payload.new.creator_id !== user.id) {
-           addNotif(`🔔 New Expense shared: "${payload.new.description}"`);
-         }
-         setRefreshTrigger(prev => prev + 1);
-      })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'expense_splits' }, (payload) => {
-         if (payload.new.has_paid) {
-           addNotif(`💸 A debt was just Settled Up live!`);
-         }
-         setRefreshTrigger(prev => prev + 1);
-      })
-      .subscribe();
-
-    return () => supabase.removeChannel(channel);
+    // Listen for mathematically destructive updates from the Global Synchronizer
+    const handleDbUpdate = () => {
+       setRefreshTrigger(prev => prev + 1);
+    };
+    
+    window.addEventListener('splitpal_db_update', handleDbUpdate);
+    return () => window.removeEventListener('splitpal_db_update', handleDbUpdate);
   }, [user]);
 
   const handleDelete = async (expenseId) => {
     const confirmDelete = window.confirm("Are you sure you want to permanently delete this expense? This will also wipe the split debts from your friends' balances.");
     if (!confirmDelete) return;
+
+    // Fetch explicitly mapped involved users mechanically for Activity Tracking
+    const { data: exp } = await supabase.from('expenses').select('*, expense_splits(user_id)').eq('id', expenseId).single();
+    if (exp) {
+       const inv = exp.expense_splits.map(s => s.user_id);
+       await supabase.from('activity_logs').insert([{
+         user_id: user.id,
+         involved_users: inv,
+         action_type: 'DELETED',
+         description: `${user?.user_metadata?.full_name || 'Someone'} deleted "${exp.description}"`
+       }]);
+    }
 
     const { error } = await supabase
       .from('expenses')
@@ -106,19 +109,6 @@ const Dashboard = () => {
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '2rem' }}>
       
-      {/* Real-time In-App Notification Toast */}
-      {notification && (
-        <div style={{ 
-          position: 'fixed', top: 30, left: '50%', transform: 'translate(-50%, 0)', 
-          background: 'var(--color-text-primary)', color: 'var(--color-bg-dark)', 
-          padding: '1rem 2rem', borderRadius: '50px', fontWeight: 600, 
-          zIndex: 1000, boxShadow: '0 10px 25px rgba(0,0,0,0.5)', 
-          animation: 'slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' 
-        }}>
-          {notification.message}
-        </div>
-      )}
-
       {showNotifModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 2000, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
           <div style={{ background: 'var(--color-bg-dark)', padding: '2rem', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', minHeight: '50vh', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
@@ -150,12 +140,14 @@ const Dashboard = () => {
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', marginBottom: '2rem' }}>
          <div>
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 500, margin: '0 0 0.2rem 0' }}>Hi there,</p>
-            <h1 style={{ fontSize: '1.8rem', fontWeight: 700, margin: 0, lineHeight: 1 }}>{user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Friend'}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h1 style={{ fontSize: '1.8rem', fontWeight: 700, margin: 0, lineHeight: 1 }}>{user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Friend'}</h1>
+              <span style={{ background: 'var(--color-card-dark)', color: 'var(--color-text-secondary)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: '10px', fontWeight: 700 }}>v2.0</span>
+            </div>
          </div>
          <div style={{ display: 'flex', gap: '1rem' }}>
-           <button onClick={() => setShowNotifModal(true)} style={{ background: 'var(--color-card-dark)', color: 'var(--color-text-primary)', padding: '0.75rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-             <Bell size={20} />
-             {notifHistory.length > 0 && <div style={{ position: 'absolute', top: 0, right: 2, width: 10, height: 10, background: 'var(--color-accent-orange)', borderRadius: '50%' }}></div>}
+           <button onClick={() => navigate('/activity')} style={{ background: 'var(--color-card-dark)', color: 'var(--color-text-primary)', padding: '0.75rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             <Activity size={20} />
            </button>
            <button onClick={signOut} style={{ background: 'var(--color-card-dark)', color: 'white', padding: '0.75rem', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
              <LogOut size={20} />
