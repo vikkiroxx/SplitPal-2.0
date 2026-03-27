@@ -12,12 +12,14 @@ const ActivityLog = () => {
   useEffect(() => {
     if (!user) return;
     const fetchLogs = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('activity_logs')
         .select('*')
-        .cs('involved_users', `{${user.id}}`)
+        .contains('involved_users', [user.id])
         .order('created_at', { ascending: false })
         .limit(100);
+        
+      if (error) console.error("Error fetching logs:", error);
         
       if (data) setLogs(data);
     };
